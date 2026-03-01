@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: bifrost-postgres
+    environment:
+      POSTGRES_USER: bifrost
+      POSTGRES_PASSWORD: bifrost_password
+      POSTGRES_DB: bifrost
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bifrost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  bifrost:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bifrost-network-planner
+    ports:
+      - "4020:3000"
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_APP_URL: http://localhost:4020
+      DATABASE_URL: postgresql://bifrost:bifrost_password@postgres:5432/bifrost?schema=public
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: admin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000', r => { if (r.statusCode !== 200) throw new Error(r.statusCode); })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  postgres_data:

@@ -1,0 +1,63 @@
+// Prisma schema for BIFROST Network Infrastructure Planning
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RoomType {
+  NORMAL    // Standard modules/cages
+  BACKBONE  // Meet-Me rooms/Carrier zones/NSE
+}
+
+model Building {
+  id        String   @id @default(cuid())
+  ibxCode   String   @unique  // e.g., "FR2", "MU1"
+  name      String              // e.g., "Frankfurt 2"
+  rooms     Room[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("buildings")
+}
+
+model Room {
+  id                String       @id @default(cuid())
+  buildingId        String
+  building          Building     @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  floor             String       // e.g., "01", "02", "UG"
+  roomNumber        String       // e.g., "50900", "NSE-01"
+  type              RoomType     @default(NORMAL)
+  systemId          String       @unique  // Format: IBX:FLOOR:ROOM (e.g., "FR2:01:50900")
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  
+  // Connections where this room is the source
+  connectionsFrom   Connection[] @relation("ConnectionFromRoom")
+  // Connections where this room is the target
+  connectionsTo     Connection[] @relation("ConnectionToRoom")
+
+  @@index([buildingId])
+  @@index([systemId])
+  @@map("rooms")
+}
+
+model Connection {
+  id            String   @id @default(cuid())
+  fromRoomId    String
+  fromRoom      Room     @relation("ConnectionFromRoom", fields: [fromRoomId], references: [id], onDelete: Cascade)
+  toRoomId      String
+  toRoom        Room     @relation("ConnectionToRoom", fields: [toRoomId], references: [id], onDelete: Cascade)
+  lengthMeters  Float    // Cable length in meters
+  rackInfo      String?  // Optional: "RackA-15 → RackB-23" (for patches within room)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([fromRoomId])
+  @@index([toRoomId])
+  @@map("connections")
+}
