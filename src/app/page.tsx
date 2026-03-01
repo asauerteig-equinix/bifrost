@@ -10,28 +10,36 @@ export default function HomePage() {
   const [result, setResult] = useState<RouteResponse | null>(null);
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Welcome to BIFROST</h2>
-        <p className="text-gray-600">
-          Calculate the optimal network routes between data center locations. 
-          Enter a start and end system ID to find the shortest path through your infrastructure.
-        </p>
-      </div>
+    <div className="min-h-screen bg-slate-50 py-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Hero Section */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+            Network Route Calculator
+          </h1>
+          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+            Calculate optimal network routes between data center locations. 
+            Enter start and end system IDs to find the shortest path through your infrastructure.
+          </p>
+        </div>
 
-      <RouteRequestForm onResult={setResult} />
+        {/* Main Content */}
+        <div className="max-w-5xl mx-auto space-y-6">
+          <RouteRequestForm onResult={setResult} />
 
-      {result && (
-        <>
-          <RouteResults result={result} />
-          {result.success && (
-            <RouteVisualizer
-              primaryRoute={result.primaryRoute}
-              redundantRoute={result.redundantRoute}
-            />
+          {result && (
+            <>
+              <RouteResults result={result} />
+              {result.success && (
+                <RouteVisualizer
+                  primaryRoute={result.primaryRoute}
+                  redundantRoute={result.redundantRoute}
+                />
+              )}
+            </>
           )}
-        </>
-      )}
+        </div>
+      </div>
     </div>
   );
 }
