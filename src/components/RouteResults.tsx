@@ -1,6 +1,6 @@
 'use client';
 
-import { RouteResponse, RouteSegment } from '@/types';
+import { RouteResponse, Route } from '@/types';
 
 interface Props {
   result: RouteResponse;
@@ -18,25 +18,24 @@ export default function RouteResults({ result }: Props) {
     );
   }
 
-  const renderRoute = (segments: RouteSegment[], title: string) => {
-    const totalDistance = segments.reduce((sum, seg) => sum + seg.lengthMeters, 0);
+  const renderRoute = (route: Route, title: string) => {
 
     return (
       <div className="bg-white border border-gray-200 rounded-lg p-4">
         <h3 className="text-lg font-semibold mb-3">{title}</h3>
         <div className="space-y-2">
-          {segments.map((segment, idx) => (
+          {route.path.map((step, idx) => (
             <div key={idx} className="border-l-4 border-blue-500 pl-3 py-1">
-              <div className="font-medium">{segment.fromSystemId} → {segment.toSystemId}</div>
+              <div className="font-medium">{step.systemId}</div>
               <div className="text-sm text-gray-600">
-                Distance: {segment.lengthMeters}m
-                {segment.rackInfo && ` • ${segment.rackInfo}`}
+                Type: {step.roomType}
+                {step.rackInfo && ` • ${step.rackInfo}`}
               </div>
             </div>
           ))}
         </div>
         <div className="mt-3 pt-3 border-t border-gray-200 font-semibold">
-          Total Distance: {totalDistance}m
+          Total Distance: {route.totalLength}m
         </div>
       </div>
     );

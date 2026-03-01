@@ -51,5 +51,5 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
 
-# Start application with migrations
-CMD ["sh", "-c", "npx prisma migrate deploy --skip-generate; npm run start"]
+# Start application with migrations (retry until database is reachable)
+CMD ["sh", "-c", "until npx prisma migrate deploy --skip-generate; do echo 'Database not ready, retrying in 3s...'; sleep 3; done; npm run start"]

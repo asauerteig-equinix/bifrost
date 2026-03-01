@@ -1,10 +1,10 @@
 'use client';
 
-import { RouteSegment } from '@/types';
+import { Route } from '@/types';
 
 interface Props {
-  primaryRoute?: RouteSegment[];
-  redundantRoute?: RouteSegment[];
+  primaryRoute?: Route;
+  redundantRoute?: Route | null;
 }
 
 export default function RouteVisualizer({ primaryRoute, redundantRoute }: Props) {
@@ -14,19 +14,29 @@ export default function RouteVisualizer({ primaryRoute, redundantRoute }: Props)
   const connections: { from: string; to: string; type: 'primary' | 'redundant' }[] = [];
 
   if (primaryRoute) {
-    primaryRoute.forEach(seg => {
-      allSystemIds.add(seg.fromSystemId);
-      allSystemIds.add(seg.toSystemId);
-      connections.push({ from: seg.fromSystemId, to: seg.toSystemId, type: 'primary' });
+    primaryRoute.path.forEach(step => {
+      allSystemIds.add(step.systemId);
     });
+    for (let index = 0; index < primaryRoute.path.length - 1; index++) {
+      connections.push({
+        from: primaryRoute.path[index].systemId,
+        to: primaryRoute.path[index + 1].systemId,
+        type: 'primary',
+      });
+    }
   }
 
   if (redundantRoute) {
-    redundantRoute.forEach(seg => {
-      allSystemIds.add(seg.fromSystemId);
-      allSystemIds.add(seg.toSystemId);
-      connections.push({ from: seg.fromSystemId, to: seg.toSystemId, type: 'redundant' });
+    redundantRoute.path.forEach(step => {
+      allSystemIds.add(step.systemId);
     });
+    for (let index = 0; index < redundantRoute.path.length - 1; index++) {
+      connections.push({
+        from: redundantRoute.path[index].systemId,
+        to: redundantRoute.path[index + 1].systemId,
+        type: 'redundant',
+      });
+    }
   }
 
   return (

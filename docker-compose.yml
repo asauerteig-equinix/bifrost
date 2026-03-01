@@ -1,9 +1,6 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: bifrost-postgres
     environment:
       POSTGRES_USER: bifrost
       POSTGRES_PASSWORD: bifrost_password
@@ -23,7 +20,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: bifrost-network-planner
     ports:
       - "4020:3000"
     environment:
@@ -33,8 +29,7 @@ services:
       ADMIN_USERNAME: admin
       ADMIN_PASSWORD: admin
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000', r => { if (r.statusCode !== 200) throw new Error(r.statusCode); })"]
